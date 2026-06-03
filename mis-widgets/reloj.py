@@ -1,34 +1,44 @@
-import sys #librería para pasarle argumentos a QApplication y salir limpiamente
-from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QVBoxLayout 
-# motor, base de la ventana, texto, acomoda los elementos
-from PyQt6.QtCore import QTimer, Qt #temporizador, constantes y flags 
+import sys #librería para pasarle argumentos a QApplication y salir de la app
+from PyQt6.QtWidgets import (QApplication, QWidget, QLabel, QVBoxLayout, QHBoxLayout,
+    QPushButton, QSpinBox, QTimeEdit, QRadioButton, QGroupBox, QStackedWidget)
+# motor, ventana base, texto, layouts (vertical/horizontal), botón, selector numérico, selector de hora, radio, contenedor, vistas apiladas
+from PyQt6.QtCore import QTimer, Qt, QTime # temporizador, constantes/flags (ej. alineación), hora del sistema
 from PyQt6.QtGui import QFont #tipografia
 
 class Reloj(QWidget): #& clase heredada de QWidget para que sepa que es una ventana
     def __init__(self): #* constructor
         super().__init__()
         self.setWindowTitle("Reloj") # nombre del widget
-        self.setFixedSize(300, 100) # medidas del widget
+        self.setFixedSize(400, 500) # medidas del widget. x,y
+        self.layoutPrincipal = QVBoxLayout() # si no ponemos esto las cosas no aparecen
 
+        #* vista de la hora
         self.label = QLabel("00:00:00") # crea el texto
-        self.label.setAlignment(Qt.AlignmentFlag.AlignCenter) # lo centra
+        self.label.setAlignment(Qt.AlignmentFlag.AlignCenter) # centra el texto
         self.label.setFont(QFont("Monospace", 40)) # tipografia y tamaño
+        self.layoutPrincipal.addWidget(self.label) # agrega el label al layout inicial
 
-        layout = QVBoxLayout() # si no ponemos esto las cosas no aparecen
-        layout.addWidget(self.label) # agrega el label al layout
-        self.setLayout(layout) # asigna el layout a la ventana
+        #* --- botones ---
+        self.layoutModos = QHBoxLayout() # layout horizontal para los botones
+        self.btnPomodoro = QPushButton("Pomodoro") # crea el boton pomodoro
+        self.btnAlarma = QPushButton("Alarma") # crea el boton alarma
+        self.layoutModos.addWidget(self.btnPomodoro) # agrega el boton al layout
+        self.layoutModos.addWidget(self.btnAlarma) # agrega el boton alarma
+        self.layoutPrincipal.addLayout(self.layoutModos) # agrega el layout botones al principal
+        #* ---
 
-        self.timer = QTimer() # crea el temporizador
-        self.timer.timeout.connect(self.actualizar_hora) # cada vez que el timer "suena", llama a actualizar_hora
-        self.timer.start(1000) # arranca el timer, dispara cada segundo
+        self.setLayout(self.layoutPrincipal) # le dice a la ventana que use este layout para acomodar sus elementos
 
-        self.actualizar_hora() # qué hora es?
+        #* logica del reloj
+        self.timer = QTimer() # crea el temporizador (como un reloj interno que "suena" cada cierto tiempo)
+        self.timer.timeout.connect(self.actualizarHora) # cuando suene, ejecuta actualizarHora
+        self.timer.start(1000) # se actualiza cada segundo
+        self.actualizarHora() # llama a la función 
 
-    def actualizar_hora(self): #* esta función es la que dirá que hora es
-        from PyQt6.QtCore import QTime
+    def actualizarHora(self): #* '¿qué hora es?' funcion
         hora = QTime.currentTime() # guarda la hora actual en la variable
-        self.label.setText(hora.toString("hh:mm:ss")) # se formatea de forma hora: minuto: segundo y lo pasa a string
-        # para que aparezca en la ventana
+        self.label.setText(hora.toString("hh:mm:ss")) # formatea la hora y convierte a string
+       
 
 #& main
 app = QApplication(sys.argv) # crea la app
